@@ -4,10 +4,12 @@ const User = require("../models/User");
 const { body, validationResult } = require("express-validator"); // we are using express-validator for validating our input fields
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const FetchUser = require("../middleware/FetchUser");
+const fetchUser = require("../middleware/FetchUser");
 
 const JWT_SECRET = "myNameIsGangeshKumar";
 
-// API for creating a new user, using : POST request and URL : /auth/createUser
+//ROUTE 1 : API for creating a new user, using : POST request and URL : /auth/createUser
 
 router.post("/createUser", [
     body("name", "Enter a valid name").isLength({ min: 5 }), // for validating name
@@ -41,14 +43,14 @@ router.post("/createUser", [
         });
 
         const data = { // this is data object, in this there is logged in user ID stored
-            user : {
-                id : user.id
+            user: {
+                id: user.id
             }
         };
 
         const authToken = await jwt.sign(data, JWT_SECRET); // authToken is constant holding authToken created by jsonwebtoken 
 
-        res.json({ 
+        res.json({
             Message: "User created successfully",
             authToken
         }); // after finally we are returing message that user created successfully
@@ -57,44 +59,62 @@ router.post("/createUser", [
     }
 });
 
-// for authenticating a user from his login credintals, using POST request and URL : /auth/loginUser
+// ROUTE 2 : for authenticating a user from his login credintals, using POST request and URL : /auth/loginUser
 
 router.post("/loginUser", [
     body("email", "Enter a valid email").isEmail(),
     body("password", "Password can not be blank").exists()
-], async(req, res) => {
+], async (req, res) => {
     const errors = validationResult(req); // here the errors, which will generated received
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const {email, password} = req.body;
-    try{
-        let user = User.findOne({ email : email });
-        if(!user){
-            return res.status(400).json({error : "Login with correct credinatals"});
+    const { email, password } = req.body;
+    try {
+        let user = User.findOne({ email: email });
+        if (!user) {
+            return res.status(400).json({ error: "Login with correct credinatals" });
         }
 
         const comparePassword = bcrypt.compare(password, user.password);
 
-        if(!comparePassword){
-            return res.status(400).json({error : "Login with correct credinatals"});
+        if (!comparePassword) {
+            return res.status(400).json({ error: "Login with correct credinatals" });
         }
 
         const data = { // this is data object, in this there is logged in user ID stored
-            user : {
-                id : user.id
+            user: {
+                id: user.id
             }
         };
 
         const authToken = await jwt.sign(data, JWT_SECRET); // authToken is constant holding authToken created by jsonwebtoken 
 
-        res.json({ 
+        res.json({
             Message: "User found",
             authToken
         }); // after finally we are returing message that user created successfully
 
-    }catch(error){
+    } catch (error) {
+        return res.status(500).json({ Error: error.message });
+    }
+});
+
+// ROUTE 3 : getting details of logged in user, using : POST request and /getUser and here login is required
+
+router.post("/getUser", fetchUser, async(req, res) => {
+    try {
+        const errors = validationResult(req); // here the errors, which will generated received
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const userID = req.user.id;
+
+        const user = await User.findOne(userID).select("-password");
+        return res.status(200).json({ user });
+    } catch (error) {
         return res.status(500).json({ Error: error.message });
     }
 });
