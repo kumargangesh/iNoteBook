@@ -57,4 +57,46 @@ router.post("/createUser", [
     }
 });
 
+// for authenticating a user from his login credintals, using POST request and URL : /auth/loginUser
+
+router.post("/loginUser", [
+    body("email", "Enter a valid email").isEmail(),
+    body("password", "Password can not be blank").exists()
+], async(req, res) => {
+    const errors = validationResult(req); // here the errors, which will generated received
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {email, password} = req.body;
+    try{
+        let user = User.findOne({ email : email });
+        if(!user){
+            return res.status(400).json({error : "Login with correct credinatals"});
+        }
+
+        const comparePassword = bcrypt.compare(password, user.password);
+
+        if(!comparePassword){
+            return res.status(400).json({error : "Login with correct credinatals"});
+        }
+
+        const data = { // this is data object, in this there is logged in user ID stored
+            user : {
+                id : user.id
+            }
+        };
+
+        const authToken = await jwt.sign(data, JWT_SECRET); // authToken is constant holding authToken created by jsonwebtoken 
+
+        res.json({ 
+            Message: "User found",
+            authToken
+        }); // after finally we are returing message that user created successfully
+
+    }catch(error){
+        return res.status(500).json({ Error: error.message });
+    }
+});
+
 module.exports = router;
