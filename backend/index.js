@@ -14,10 +14,11 @@ mongoose.connect(databaseURI).then(() => { // this is the function to connect wi
     console.log("error message : "+err)
 });
 
-app.get('/', (req, res) => {
-  res.send('this is the very first API, built from Gangesh Kumar')
-})
+// available routes 
+
+app.use("/mern/auth", require("./routes/auth")); // this is the parent endpoint for authentication related routes
+app.use("/mern/notes", require("./routes/notes")); // this is the parent endpoint for notes related routes
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`iNoteBook app listening on port ${port}`)
 })
