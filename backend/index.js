@@ -14,6 +14,8 @@ mongoose.connect(databaseURI).then(() => { // this is the function to connect wi
     console.log("error message : "+err)
 });
 
+app.use(express.json()) // middleware to ready values from body of request
+
 // available routes 
 
 app.use("/mern/auth", require("./routes/auth")); // this is the parent endpoint for authentication related routes
