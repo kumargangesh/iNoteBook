@@ -1,7 +1,11 @@
 const express = require("express"); // getting express
 const router = express.Router(); // getting router from express.Router()
 const User = require("../models/UserModel"); // fetching User from UserModel
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
+
+const JWT_SIGN = "iNoteBook"; // this is the JWT SIGN, use to generate Token of logged user
 
 // endpoint to create user using POST request and endpoint "/mern/auth/createuser", no login required
 router.post(
@@ -29,14 +33,25 @@ router.post(
           .status(400)
           .json({ message: "user with this email already exists" });
 
+      var salt = await bcrypt.genSalt(10); // this is the salt 
+      var securePassword = await bcrypt.hash(req.body.password, salt); // creating a secure password, using hash function of bcrypt and passing the plain password and genaredt salt
+
       user = await User.create({ // creating an new user
         // creting an User
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password,
+        password: securePassword,
       });
 
-      res.status(200).json({ user, message: "User created successfully" }); // sending the user,when it created successfully
+      const data = { // data object consisting of newly created user, whose id receiving from database
+        user : {
+          id : user.id
+        }
+      };
+
+      const authToken = jwt.sign(data, JWT_SIGN); // generating the token, to pass reather the whole user
+
+      res.status(200).json({ authToken, message: "User created successfully" }); // sending the user,when it created successfully
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
