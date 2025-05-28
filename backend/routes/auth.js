@@ -58,4 +58,43 @@ router.post(
   }
 );
 
-module.exports = router; // exporting the router variable to parent component
+// endpoint to login user using POST request and endpoint "/mern/auth/login", no login required
+
+router.post("/login", [
+  body("email", "enter a valid email").isEmail(),
+  body("password", "password length should be grater than 5").isLength({min : 5})
+], async(req, res) => {
+  const error = validationResult(req); // getting errors from validationResult
+    if (!error.isEmpty()) return res.status(400).json({ error: error.array() });
+    // returning status 400, with json message for errors received from errors array
+
+    try{
+      
+      const { email, password } = req.body; // destructuring user's email and password from req.body
+      
+      const user = await User.findOne({email});
+      if(!user){
+        res.status(400).json({ message : "Login with correct credintials" });
+      }
+
+      const passwordCompare = await bcrypt.compare(password, user.password); // comparing the stored user's password and entred user password
+      if(!passwordCompare){
+        res.status(400).json({ message : "Login with correct credintials" });
+      }
+
+      const data = { // data object consisting of newly created user, whose id receiving from database
+        user : {
+          id : user.id
+        }
+      };
+
+      const authToken = jwt.sign(data, JWT_SIGN); // generating the token, to pass reather the whole user
+
+      res.status(200).json({ authToken, message: "User found successfully" }); // sending the authToken, when it found successfully
+
+    }catch(error){
+      res.status(500).json({ error : error.message });
+    }
+});
+
+module.exports = router; // exporting the router variable to parent component 
