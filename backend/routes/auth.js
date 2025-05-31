@@ -4,6 +4,7 @@ const User = require("../models/UserModel"); // fetching User from UserModel
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
+const FetchUser = require("../middleware/FetchUser");
 
 const JWT_SIGN = "iNoteBook"; // this is the JWT SIGN, use to generate Token of logged user
 
@@ -96,5 +97,26 @@ router.post("/login", [
       res.status(500).json({ error : error.message });
     }
 });
+
+// endpoint to get logedin user details using POST request and endpoint "/mern/auth/getUser", login required
+
+router.post("/getUser", FetchUser, async(req, res) => {
+    try{
+      const userID = req.user.id; // fetching the userID from req.user.id
+
+      const user = await User.findById(userID).select("-password"); // fetching the user details except the password
+
+      if(!user){
+        res.status(400).json({ message : "Login with correct credintials" });
+      }
+      res.status(200).json({
+        user, "message" : "User found successfully"
+      });
+
+    }catch(err){
+      res.status(500).json({ error : err.message });
+    }
+});
+
 
 module.exports = router; // exporting the router variable to parent component 
