@@ -21,8 +21,6 @@ router.post("/addNote", FetchUser, [
     if (!error.isEmpty()) return res.status(400).json({ error: error.array() });
     // returning status 400, with json message for errors received from errors array
 
-    // check whether the user with email exists
-
     const { title, description } = req.body;
 
     try{
@@ -33,6 +31,42 @@ router.post("/addNote", FetchUser, [
         const savedNote = await note.save();
 
         res.status(200).json({savedNote});
+    }catch(error){
+        res.status(500).send({ error : error.message})
+    }
+});
+
+// ROUTE 3. to update a Note using "/mern/Notes/updateNote" by PUT request and Login required
+
+router.put("/updateNote/:id", FetchUser, [
+    body("title").isLength({ min : 1 }),
+    body("description").isLength({ min : 1 })
+], async(req, res) => {
+    const error = validationResult(req); // getting errors from validationResult
+    if (!error.isEmpty()) return res.status(400).json({ error: error.array() });
+    // returning status 400, with json message for errors received from errors array
+
+    const { title, description } = req.body;
+
+    try{
+        let newNote = {  }; // creating a new note 
+
+        if(title) { newNote.title = title } // checking whether the title exists
+        if(description) { newNote.description = description } // checking whether the description exists
+
+        let noteToUpdate = await Notes.findById(req.params.id); // fetching the note using id receiving from parameters
+        if(!noteToUpdate){
+            res.status(401).json({"message" : "Note not found"});
+        }
+
+        if(noteToUpdate.user.toString() != req.user.id){ // checking whether the logged in user is updating its own notes or not
+            res.status(401).json({"message" : "You are not allowed to make changes in this note"});
+        }
+
+        noteToUpdate = await Notes.findByIdAndUpdate(req.params.id, {$set : newNote}, {new : true});
+        // finally updating the note 
+        res.status(200).json({ "message" : "Note updated successfully" });
+
     }catch(error){
         res.status(500).send({ error : error.message})
     }
