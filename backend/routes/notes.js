@@ -72,4 +72,27 @@ router.put("/updateNote/:id", FetchUser, [
     }
 });
 
+// ROUTE 4. to delete a Note using "/mern/Notes/deleteNote" by DELETE request and Login required
+
+router.delete("/deleteNote/:id", FetchUser, async(req, res) => {
+    try{
+        let noteToUpdate = await Notes.findById(req.params.id); // fetching the note using id receiving from parameters
+        if(!noteToUpdate){
+            res.status(401).json({"message" : "Note not found"});
+        }
+
+        if(noteToUpdate.user.toString() != req.user.id){ // checking whether the logged in user is updating its own notes or not
+            res.status(401).json({"message" : "You are not allowed to make changes in this note"});
+        }
+
+        noteToUpdate = await Notes.findByIdAndDelete(req.params.id);
+        // finally deleting the note 
+
+        res.status(200).json({ "message" : "Note deleted successfully" });
+
+    }catch(error){
+        res.status(500).send({ error : error.message})
+    }
+});
+
 module.exports = router; // exporting the router variable to parent component
