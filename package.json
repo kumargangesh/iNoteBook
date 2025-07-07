@@ -1,20 +1,32 @@
 {
   "name": "inotebook",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "homepage": "https://github.com/kumargangesh/iNoteBook#readme",
+  "bugs": {
+    "url": "https://github.com/kumargangesh/iNoteBook/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kumargangesh/iNoteBook.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "eslint.config.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "both" : "concurrently \"npm run dev\" \"nodemon backend/index.js\" "
+    "both": "concurrently \"npm run dev\" \"nodemon backend/index.js\" "
   },
   "dependencies": {
     "concurrently": "^9.1.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.1"
+    "react-router-dom": "^7.6.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
