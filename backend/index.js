@@ -6,7 +6,9 @@ const express = require('express')
 const app = express() // getting instance of express in app variable
 const port = 5000 // 5000, is the port for express server
 
-const databaseURI = "mongodb://localhost:27017/"; // this is MongoDB's URL
+// const databaseURI = "mongodb://localhost:27017/"; // this is MongoDB's URL
+
+const databaseURI = "mongodb+srv://machinelearning0770:gk_MONGODB_9555@cryptodiary.64j6drl.mongodb.net/iNoteBook"; // this is MongoDB's URL
 
 mongoose.connect(databaseURI).then(() => { // this is the function to connect with MongoDB
     console.log("connected to database")

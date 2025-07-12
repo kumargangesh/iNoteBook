@@ -1,9 +1,13 @@
-import React from 'react'
+import {useContext} from 'react';
+import noteContext from '../Context/NoteContext';
 
 export default function Notes() {
+
+  const context = useContext(noteContext);
+
   return (
     <div>
-      this is Notes.jsx
+      {context.course}
     </div>
   )
 }
