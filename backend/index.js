@@ -1,10 +1,13 @@
 const mongoose = require("mongoose")
 const express = require('express')
+var cors = require('cors');
 
 // in above, we are importing mongoose and express 
 
 const app = express() // getting instance of express in app variable
 const port = 5000 // 5000, is the port for express server
+
+app.use(cors());
 
 // const databaseURI = "mongodb://localhost:27017/"; // this is MongoDB's URL
 
